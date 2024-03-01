@@ -4,4 +4,4 @@ This repository is for the codes of the TGRS paper "AIO2: Online Correction of O
 
 
 ## Methodology
-
+![Illustration of AIO2](media\Flowchart.pdf)
