@@ -9,12 +9,13 @@ This repository is for the codes of the TGRS paper "[AIO2: Online Correction of 
 
 ## Citation:
 ```
-@misc{liu2024aio2,
-      title={AIO2: Online Correction of Object Labels for Deep Learning with Incomplete Annotation in Remote Sensing Image Segmentation}, 
-      author={Chenying Liu and Conrad M Albrecht and Yi Wang and Qingyu Li and Xiao Xiang Zhu},
-      year={2024},
-      eprint={2403.01641},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
-}
+@ARTICLE{liuaio2,
+  author={Liu, Chenying and Albrecht, Conrad M and Wang, Yi and Li, Qingyu and Zhu, Xiao Xiang},
+  journal={IEEE Transactions on Geoscience and Remote Sensing}, 
+  title={AIO2: Online Correction of Object Labels for Deep Learning with Incomplete Annotation in Remote Sensing Image Segmentation}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={in process},
+  doi={10.1109/TGRS.2024.3373908}}
 ```
