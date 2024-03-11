@@ -11,7 +11,7 @@ import numpy as np
 from pathlib import Path
 
 # appending self-defined package path
-sys.path.append('../AIO2')
+sys.path.append('./')
 
 import torch
 import torch.nn.functional as F
