@@ -21,7 +21,7 @@ In addition, a teacher model is introduced whose weights are updated by *exponen
 
 ## Citation:
 If you find the codes are useful, please cite our work:
-```
+```BibTeX
 @ARTICLE{liu-aio2,
   author={Liu, Chenying and Albrecht, Conrad M and Wang, Yi and Li, Qingyu and Zhu, Xiao Xiang},
   journal={IEEE Transactions on Geoscience and Remote Sensing}, 
@@ -32,3 +32,38 @@ If you find the codes are useful, please cite our work:
   pages={in process},
   doi={10.1109/TGRS.2024.3373908}}
 ```
+## Usage
+Scripts denoted with `png` are for the Massachusetts dataset, while those with `h5` are for the Germany dataset.
+- **Label noise injection**: please refer to `data_preparation/ReadMe.txt` for details
+- **Run AIO2**: an example on the Massachusetts dataset
+```bash
+python py_scripts/train_unet_png_emaCorrect_singleGPU.py \
+        --data_path path-to-data \
+        --noise_dir_name ns-dir-name \
+        --monte_carlo_run 1 \
+        --save_dir path-to-save \
+        --model_type unet \
+        --loss_type cd \
+        --batch_size 128 \
+        --test_batch_size 50 \
+        --num_workers 8 \
+        --epochs 325 \
+        --learning_rate 0.001 \
+        --cal_tr_acc \
+        --project_name wandb-project-name \
+        --entity_name wandb-entity-name \
+        --wandb_mode online \
+        --el_window_sizes 10 20 30 40 \
+        --correct_base iter \
+        --correct_model teacher \
+        --correct_meth object \
+        --soft_filter_size 5 \
+        --display_interval 20 \
+        --save_interval 5 \
+        --seed 42 
+```
+- **Other compared methods**:
+  - Baseline: `train_unet_{png/h5_smp}_pixelCorrect_singleGPU.py`
+  - Pixel-wise `correction: train_unet_{png/h5_smp}_pixelCorrect_singleGPU`
+  - Bootstrapping: `train_unet_{png/h5_smp}_bootstrap_singleGPU.py`
+  - Consistency constraint: `train_unet_{png/h5_smp}_emaConsistReg_singleGPU.py`
