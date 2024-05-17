@@ -24,3 +24,4 @@ memo_analyse.py
 test_statistics.py
 utils.py
 train_sbatch.sh
+*.sh

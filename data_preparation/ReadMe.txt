@@ -1,10 +1,10 @@
 This folder contains files for data preparation on two datasets.
 
 For Massachussets dataset:
-1 - remove_no_data.py - remove no-data patches 
-2 - count_and_index_buildings.py - generate building index files
-3 - insert_label_noises.py - [MAIN FUNCTION] insert incomplete label noises
-4 - check_data.py - evaluate the quality of generated noisy labels
+1 - png_remove_no_data.py - remove no-data patches 
+2 - png_count_and_index_buildings.py - generate building index files
+3 - png_insert_label_noises.py - [MAIN FUNCTION] insert incomplete label noises
+4 - png_check_data.py - evaluate the quality of generated noisy labels
 
 For Germany dataset:
 1 - h5_data_clean.py - clean data according to Nikolai's visual check results 
