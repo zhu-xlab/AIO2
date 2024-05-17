@@ -23,3 +23,4 @@ dice_score_weight.py
 memo_analyse.py
 test_statistics.py
 utils.py
+train_sbatch.sh

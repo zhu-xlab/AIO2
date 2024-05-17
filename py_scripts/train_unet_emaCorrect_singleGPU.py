@@ -291,7 +291,7 @@ def main():
                config=args,
                group=group_name,
                job_type=args.job_type,
-               name=f'lt_{args.loss_type}_{args.mcr}_r{last_epoch}',
+               name=f'lt_{args.loss_type}_{args.mcr}', #_r{last_epoch}',
                dir=pdir,
                resume=False)
     # Log the network weight histograms (optional)
@@ -323,7 +323,7 @@ def main():
     # start training
     fepochs = args.epochs*2
     n_back = 0
-    wp = 'bs_'
+    wp = 'bc_'  # prefix used before correction
     for epoch in range(last_epoch, fepochs):
         # update epoch index
         epoch -= n_back
@@ -638,11 +638,14 @@ def main():
                          'model_state_dict_mit': net_ema_it.state_dict(),
                          'optimizer_state_dict':optimizer.state_dict(),
                          'loss':epoch_loss/batch_in_epoch,}
-            if not correct: save_dict['tr_iou_mit'] = np.array(tr_iou_mit)
             if args.esb_ep: save_dict['model_state_dict_mep'] = net_ema_ep.state_dict(),
-            torch.save(save_dict, 
-                       args.checkpoints_dir + '/checkpoint_mcr_{}_epoch_{}.pth'.format(args.mcr,epoch+1))
-        
+            if correct:
+                chkp_path = args.checkpoints_dir + '/checkpoint_correct_mcr_{}_epoch_{}.pth'.format(args.mcr,epoch+1)
+            else:
+                save_dict['tr_iou_mit'] = np.array(tr_iou_mit)
+                chkp_path = args.checkpoints_dir + '/checkpoint_mcr_{}_epoch_{}.pth'.format(args.mcr,epoch+1)
+            torch.save(save_dict, chkp_path)
+            
         # update 
         if args.cbase == 'epoch':
             del net_ema_it_cp

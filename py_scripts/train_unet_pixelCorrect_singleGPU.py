@@ -300,7 +300,7 @@ def main():
                config=args,
                group=args.unet_type,
                job_type=args.job_type,
-               name=f'lt_{args.loss_type}_{args.mcr}_r{last_epoch}',
+               name=f'lt_{args.loss_type}_{args.mcr}', #_r{last_epoch}',
                dir=pdir,
                resume=False)
     # # Log the network weight histograms (optional)
@@ -326,7 +326,7 @@ def main():
     # start training
     fepochs = args.epochs*2
     n_back = 0
-    wp = 'bs_'
+    wp = 'bc_'  # prefix used before correction
     # start training
     for epoch in range(last_epoch, fepochs):
         # update epoch index
@@ -357,7 +357,7 @@ def main():
                                                 adaptive_K=args.adp_K,
                                                 adaptive_type=args.adp_Kt, 
                                                 more_or_less=args.adp_Ktct)
-            print(f'[Epoch-{epoch}|Correct] IoU:{ns_metrics["iou"]}, Recall:{ns_metrics["recall"]}, Precision:{ns_metrics["precise"]}, OA:{ns_metrics["oa"]}')
+            # print(f'[Epoch-{epoch}|Correct] IoU:{ns_metrics["iou"]}, Recall:{ns_metrics["recall"]}, Precision:{ns_metrics["precise"]}, OA:{ns_metrics["oa"]}')
         
         # - TRAINING in each batch
         for bi, batch in enumerate(train_loader):
@@ -611,10 +611,13 @@ def main():
                          'model_state_dict_mit': net_ema_it.state_dict(),
                          'optimizer_state_dict':optimizer.state_dict(),
                          'loss':epoch_loss/batch_in_epoch,}
-            if not correct: save_dict['tr_iou_mit'] = np.array(tr_iou_mit)
             if args.esb_ep: save_dict['model_state_dict_mep'] = net_ema_ep.state_dict(),
-            torch.save(save_dict, 
-                       args.checkpoints_dir + '/checkpoint_mcr_{}_epoch_{}.pth'.format(args.mcr,epoch+1))
+            if correct:
+                chkp_path = args.checkpoints_dir + '/checkpoint_correct_mcr_{}_epoch_{}.pth'.format(args.mcr,epoch+1)
+            else:
+                save_dict['tr_iou_mit'] = np.array(tr_iou_mit)
+                chkp_path = args.checkpoints_dir + '/checkpoint_mcr_{}_epoch_{}.pth'.format(args.mcr,epoch+1)
+            torch.save(save_dict, chkp_path)
         
         
         # 7> end of training
