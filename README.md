@@ -64,6 +64,6 @@ python py_scripts/train_unet_png_emaCorrect_singleGPU.py \
 ```
 - **Other compared methods**:
   - Baseline: `train_unet_{png/h5_smp}_pixelCorrect_singleGPU.py`
-  - Pixel-wise `correction: train_unet_{png/h5_smp}_pixelCorrect_singleGPU`
+  - Pixel-wise correction (w/ or w/o loss constraint): `train_unet_{png/h5_smp}_pixelCorrect_singleGPU`
   - Bootstrapping: `train_unet_{png/h5_smp}_bootstrap_singleGPU.py`
   - Consistency constraint: `train_unet_{png/h5_smp}_emaConsistReg_singleGPU.py`
