@@ -39,18 +39,21 @@ class BuildingDataset(Dataset):
     def __init__(self, data_dir, data_name, noisy_label_name, 
                  partition_name, partition_version=1,
                  split='train', aug=True, pcorrect_label_dirname=None,
-                 load_origin=False):
+                 load_origin=False, only_load_gt=False):
         # data paths
         self.data_path = join(data_dir, data_name)
-        self.noisy_label_path = join(data_dir, noisy_label_name)
         partition_path = join(data_dir, partition_name)
-        # pixel-wise corrected label path
-        if pcorrect_label_dirname is not None:
-            self.pcn_dir = join(data_dir, pcorrect_label_dirname) # pixel corrected noisy labels
-            assert exists(self.pcn_dir), "corrected label dir doesn't exist!"
-            self.load_origin = load_origin
-        else:
-            self.pcn_dir = None
+        self.load_ns = (not only_load_gt)
+        
+        if self.load_ns:
+            self.noisy_label_path = join(data_dir, noisy_label_name)
+            # pixel-wise corrected label path
+            if pcorrect_label_dirname is not None:
+                self.pcn_dir = join(data_dir, pcorrect_label_dirname) # pixel corrected noisy labels
+                assert exists(self.pcn_dir), "corrected label dir doesn't exist!"
+                self.load_origin = load_origin
+            else:
+                self.pcn_dir = None
             
         # check split name
         if split == 'train':
@@ -84,11 +87,12 @@ class BuildingDataset(Dataset):
         with h5py.File(self.data_path,'r') as f:
             img = f['dat'][ind].transpose((1,2,0))
             gt = f['lab'][ind].astype(float)
-        with h5py.File(self.noisy_label_path,'r') as fn:
-            ns = fn['lab'][ind].astype(float)
-        if self.pcn_dir is not None:
-            pcn_path = join(self.pcn_dir,f'{ind}.png')
-            cns = cv2.imread(pcn_path,0).astype(float)
+        if self.load_ns:
+            with h5py.File(self.noisy_label_path,'r') as fn:
+                ns = fn['lab'][ind].astype(float)
+            if self.pcn_dir is not None:
+                pcn_path = join(self.pcn_dir,f'{ind}.png')
+                cns = cv2.imread(pcn_path,0).astype(float)
 
         # transforms
         if self.split == 'train' and self.aug:
@@ -96,27 +100,31 @@ class BuildingDataset(Dataset):
                 fcode = random.choice([-1,0,1])
                 img = cv2.flip(img,fcode)
                 gt = cv2.flip(gt,fcode)
-                ns = cv2.flip(ns,fcode)
-                if self.pcn_dir is not None:
-                    cns = cv2.flip(cns,fcode)
+                if self.load_ns:
+                    ns = cv2.flip(ns,fcode)
+                    if self.pcn_dir is not None:
+                        cns = cv2.flip(cns,fcode)
         
         # to tensor
         if self.transform is not None:
             img = self.transform(img)                
             gt = self.transform(gt)
-            ns = self.transform(ns)
-            if self.pcn_dir is not None:
-                cns = self.transform(cns)
+            if self.load_ns:
+                ns = self.transform(ns)
+                if self.pcn_dir is not None:
+                    cns = self.transform(cns)
         
         # return dict
-        if self.pcn_dir is None: 
-            return_dict = {'img': img.float(), 'gt': gt.long(), 'ns': ns.long()}
+        if self.load_ns:
+            if self.pcn_dir is None: 
+                return_dict = {'img': img.float(), 'gt': gt.long(), 'ns': ns.long()}
+            else:
+                return_dict = {'img': img.float(), 'gt': gt.long(), 
+                            'ns': cns.long(), 'fname':pcn_path}
+                if self.load_origin: return_dict['ons'] = ns.long()
+            return return_dict
         else:
-            return_dict = {'img': img.float(), 'gt': gt.long(), 
-                           'ns': cns.long(), 'fname':pcn_path}
-            if self.load_origin: return_dict['ons'] = ns.long()
-            
-        return return_dict
+            return {'img': img.float(), 'gt': gt.long()}
 
 
 def copy_original_labels(partition_path, noisy_label_path, save_dir,

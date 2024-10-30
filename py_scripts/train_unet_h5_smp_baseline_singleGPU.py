@@ -199,11 +199,11 @@ def main():
     
     ###### 2 - load data ######
     train_dataset = BuildingDataset(args.data_dir, args.dname, args.nsname, 
-                                    args.pname, args.mcr, split='train', aug=True)
+                                    args.pname, args.mcr, split='train', aug=True, only_load_gt=(args.experiment=='gt_labels'))
     val_dataset = BuildingDataset(args.data_dir, args.dname, args.nsname, 
-                                  args.pname, args.mcr, split='val', aug=False)
+                                  args.pname, args.mcr, split='val', aug=False, only_load_gt=(args.experiment=='gt_labels'))
     test_dataset = BuildingDataset(args.data_dir, args.dname, args.nsname, 
-                                   args.pname, args.mcr, split='test', aug=False)
+                                   args.pname, args.mcr, split='test', aug=False, only_load_gt=(args.experiment=='gt_labels'))
 
     # construct dataloaders
     train_loader = DataLoader(train_dataset,
@@ -333,11 +333,13 @@ def main():
             steps += 1
             # 1> load data
             images = batch['img']                
-            ns_masks = torch.squeeze(batch['ns'],1)
             gt_masks = torch.squeeze(batch['gt'],1)
             # decide training label type (exact or noisy ones)
             assert args.experiment in ['ns_labels','gt_labels'], 'Experiment label type is wrong!'
-            true_masks = ns_masks if args.experiment == 'ns_labels' else gt_masks.clone()
+            if args.experiment == 'ns_labels':
+                true_masks = torch.squeeze(batch['ns'],1)
+            else:
+                true_masks = gt_masks.clone()
             # check if number of input channels is compatible to model setting
             assert images.shape[1] == args.n_channels, \
                 f'Network has been defined with {args.n_channels} input channels, ' \

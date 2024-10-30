@@ -38,20 +38,23 @@ class DataSubset(Dataset):
 
 class BuildingDataset(Dataset):
     def __init__(self, data_path, noise_dir_name='ns_seg', split='train', 
-                 aug=True, origin_ns_dir=None):
+                 aug=True, origin_ns_dir=None, only_load_gt=False):
         # data paths
         self.data_path = join(data_path, split, 'data')
         self.gt_path = join(data_path, split, 'seg')
+        self.load_ns = (not only_load_gt)
         
-        if exists(noise_dir_name):
-            self.ns_path = noise_dir_name
-        else:
-            self.ns_path = join(data_path, split, noise_dir_name)
+        if self.load_ns:
+            if exists(noise_dir_name):
+                self.ns_path = noise_dir_name
+            else:
+                self.ns_path = join(data_path, split, noise_dir_name)
         
-        if origin_ns_dir is not None:
-            self.ons_path = join(data_path, split, origin_ns_dir)
-        else:
-            self.ons_path = None
+            if origin_ns_dir is not None:
+                self.ons_path = join(data_path, split, origin_ns_dir)
+            else:
+                self.ons_path = None
+
         self.split = split
         self.aug = aug
         
@@ -83,16 +86,18 @@ class BuildingDataset(Dataset):
         fname = self.fnames[index]
         ipath = join(self.data_path, fname)
         gpath = join(self.gt_path, fname)
-        npath = join(self.ns_path, fname)
-        if self.ons_path is not None:
-            onpath = join(self.ons_path, fname)
+        if self.load_ns:
+            npath = join(self.ns_path, fname)
+            if self.ons_path is not None:
+                onpath = join(self.ons_path, fname)
         
         # load data
         img = cv2.imread(ipath)/255.0
         gt = cv2.imread(gpath,0).astype(float)
-        ns = cv2.imread(npath,0).astype(float)
-        if self.ons_path is not None:
-            ons = cv2.imread(onpath,0).astype(float)
+        if self.load_ns:
+            ns = cv2.imread(npath,0).astype(float)
+            if self.ons_path is not None:
+                ons = cv2.imread(onpath,0).astype(float)
 
         # transforms
         if self.split == 'train' and self.aug:
@@ -100,22 +105,26 @@ class BuildingDataset(Dataset):
                 fcode = random.choice([-1,0,1])
                 img = cv2.flip(img,fcode)
                 gt = cv2.flip(gt,fcode)
-                ns = cv2.flip(ns,fcode)
-                if self.ons_path is not None:
-                    ons = cv2.flip(ons,fcode)
+                if self.load_ns:
+                    ns = cv2.flip(ns,fcode)
+                    if self.ons_path is not None:
+                        ons = cv2.flip(ons,fcode)
         
         
         if self.transform is not None:
             img = self.transform(img)                
             gt = self.transform(gt)
-            ns = self.transform(ns)
-            if self.ons_path is not None:
-                ons = self.transform(ons)
-                
-        return_dict = {'img': img.float(), 'gt': gt.long(), 'ns': ns.long(), 'fname':fname}
-        if self.ons_path is not None: return_dict['ons'] = ons.long()
+            if self.load_ns:
+                ns = self.transform(ns)
+                if self.ons_path is not None:
+                    ons = self.transform(ons)
         
-        return return_dict
+        if self.load_ns:
+            return_dict = {'img': img.float(), 'gt': gt.long(), 'ns': ns.long(), 'fname':fname}
+            if self.ons_path is not None: return_dict['ons'] = ons.long()
+            return return_dict
+        else:
+            return {'img': img.float(), 'gt': gt.long(), 'fname':fname}
         
             
             
