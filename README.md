@@ -27,9 +27,9 @@ If you find the codes are useful, please cite our work:
   journal={IEEE Transactions on Geoscience and Remote Sensing}, 
   title={AIO2: Online Correction of Object Labels for Deep Learning with Incomplete Annotation in Remote Sensing Image Segmentation}, 
   year={2024},
-  volume={},
+  volume={62},
   number={},
-  pages={in process},
+  pages={1-17},
   doi={10.1109/TGRS.2024.3373908}}
 ```
 ## Usage
